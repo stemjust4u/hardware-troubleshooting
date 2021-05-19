@@ -26,6 +26,8 @@ def rtcdate(tpl):
 def localdate(tpl):
     return "{:4}-{}-{} {:2}:{:02d}:{:02d}".format(tpl[0], tpl[1], tpl[2], tpl[3], tpl[4], tpl[5])
 
+def valmap(value, istart, istop, ostart, ostop):
+        return ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
 '''
 localtime = (2021, 5, 6, 12, 55, 0, 0, 0) #(year, month, day, hour, minute, second, weekday, yearday)
 print(utime.time())    # integer, seconds since 1/1/2000, returned from RTC.  Add hrs*3600 for adjustment
