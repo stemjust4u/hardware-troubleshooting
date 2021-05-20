@@ -21,7 +21,7 @@ def run_GPIO_test(testingpins, resultsfile):
     pinlist = testingpins
     file = resultsfile
     mode = 'a'
-    ulogging.basicConfig(level=20) # Change logger global settings
+    ulogging.basicConfig(level=10) # Change logger global settings
     logger = ulogging.getLogger(__name__)
     logger.info("GPIO Pin test on pins: {0}".format(pinlist))
     logger.info("Results written to file: {0}".format(file))
@@ -34,7 +34,7 @@ def run_GPIO_test(testingpins, resultsfile):
     adc.width(ADC.WIDTH_12BIT)
     # Measure pin out hi/lo and then pin in with internal up/down resistor
     logger.info("I/O HI/LO AND UP/DOWN RESISTOR MEASUREMENT STARTING")
-    logger.error("CONNECT ADC PIN {0} TO {1}".format(adcPin, pinlist[0]))
+    logger.warning("CONNECT ADC PIN {0} TO {1}".format(adcPin, pinlist[0]))
     sleep(10)
     logger.info("PIN, TEST, IN_PUP/PWM_ERROR%, IN_PUP_V, IN_PDOWN, IN_PDOWN_V, OUT_LO, OUT_HI")
     with open(file, mode) as f:
@@ -48,27 +48,39 @@ def run_GPIO_test(testingpins, resultsfile):
             test_out.value(0)
             sleep(0.2)
             volt_out_lo = valmap(adc.read(), 0, 4095, 0, 3.3)
-            logger.debug("{0}, OUT, 0, {1}".format(testpin, valmap(adc.read(), 0, 4095, 0, 3.3)))
+            if volt_out_lo < 0.1:
+                logger.debug("{0}, OUT, 0, {1}".format(testpin, volt_out_lo))
+            else:
+                logger.error("{0}, OUT, 0, {1}".format(testpin, volt_out_lo))
             test_out.value(1)
             sleep(0.2)
             volt_out_hi = valmap(adc.read(), 0, 4095, 0, 3.3)
-            logger.debug("{0}, OUT, 1, {1}".format(testpin, valmap(adc.read(), 0, 4095, 0, 3.3)))
+            if volt_out_hi > 3.2:
+                logger.debug("{0}, OUT, 1, {1}".format(testpin, volt_out_hi))
+            else:
+                logger.error("{0}, OUT, 1, {1}".format(testpin, volt_out_hi))
             sleep(0.5)
 
         #PIN IN TESTING WITH BOTH PULLED_UP AND PULLED_DOWN
         test_in = Pin(testpin, Pin.IN, Pin.PULL_UP)
         sleep(0.2)
         test_in_up, volt_in_up = test_in.value(), valmap(adc.read(), 0, 4095, 0, 3.3)
-        logger.debug("{0}, IN, PULLED_UP, {1}, {2}".format(testpin, valmap(adc.read(), 0, 4095, 0, 3.3), test_in.value()))
+        if volt_in_up > 3.2:
+            logger.debug("{0}, IN, PULLED_UP, {1}, {2}".format(testpin, volt_in_up, test_in.value()))
+        else:
+            logger.error("{0}, IN, PULLED_UP, {1}, {2}".format(testpin, volt_in_up, test_in.value()))
         test_in = Pin(testpin, Pin.IN, Pin.PULL_DOWN)
         sleep(0.2)
         test_in_dwn, volt_in_dwn = test_in.value(), valmap(adc.read(), 0, 4095, 0, 3.3)
-        logger.debug("{0}, IN, PULLED_DOWN, {1}, {2}".format(testpin, valmap(adc.read(), 0, 4095, 0, 3.3), test_in.value()))
+        if volt_in_dwn < 0.1:
+            logger.debug("{0}, IN, PULLED_DOWN, {1}, {2}".format(testpin, volt_in_dwn, test_in.value()))
+        else:
+            logger.error("{0}, IN, PULLED_DOWN, {1}, {2}".format(testpin, volt_in_dwn, test_in.value()))
         logger.info("IO({0},input,output), IO, {1}, {2:.2f}, {3}, {4:.2f}, {5}, {6}".format(testpin, test_in_up, volt_in_up, test_in_dwn, volt_in_dwn, volt_out_lo, volt_out_hi))
         with open(file, mode) as f:
             f.write("\nIO({0},input,output), IO, {1}, {2:.2f}, {3}, {4:.2f}, {5}, {6}".format(testpin, test_in_up, volt_in_up, test_in_dwn, volt_in_dwn, volt_out_lo, volt_out_hi))
         if i < (len(pinlist)-1):
-            logger.error("CHANGE TO PIN {0}".format(pinlist[i+1]))
+            logger.warning("CHANGE TO PIN {0}".format(pinlist[i+1]))
             sleep(5)
 
 
@@ -77,7 +89,7 @@ def run_GPIO_test(testingpins, resultsfile):
     freqout = 100       # Setup pin for outputing PWM to be read by other pins
     dutyout = 512
     logger.info("PWM USING PIN {0} TO CREATE SIGNAL AT {1}Hz and DC {2}".format(encoderPin, freqout, dutyout))
-    logger.error("CONNECT PWM PIN {0} TO {1}".format(encoderPin, pinlist[0]))
+    logger.warning("CONNECT PWM PIN {0} TO {1}".format(encoderPin, pinlist[0]))
     sleep(10)
     # can set frequency 1-40MHz (higher freq has lower duty resolution)
     # duty cycle from 0 to 1023 (0-100%) duty cycle
@@ -124,7 +136,7 @@ def run_GPIO_test(testingpins, resultsfile):
             with open(file, mode) as f:
                 f.write("\nPWM({0}, freq={1}, duty={2}), PWM_READ_HZ, {3:.1f}".format(pin, freqout, dutyout, ((freq-sum(periodArr)/len(periodArr))/freq*100)))
         if i < (len(pinlist)-1):
-            logger.error("CHANGE TO PIN {0}".format(pinlist[i+1]))
+            logger.warning("CHANGE TO PIN {0}".format(pinlist[i+1]))
             sleep(5)
         pwmOUT.deinit()
 
