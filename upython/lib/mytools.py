@@ -28,17 +28,3 @@ def localdate(tpl):
 
 def valmap(value, istart, istop, ostart, ostop):
         return ostart + (ostop - ostart) * ((value - istart) / (istop - istart))
-'''
-localtime = (2021, 5, 6, 12, 55, 0, 0, 0) #(year, month, day, hour, minute, second, weekday, yearday)
-print(utime.time())    # integer, seconds since 1/1/2000, returned from RTC.  Add hrs*3600 for adjustment
-print((utime.localtime()))   # current time from RTC is returned. If seconds/integer is passed to it it converts to 8-tuple
-print(localdate((utime.localtime())))
-
-86400 seconds in a day, 3600 seconds in an hour
-
-t =utime.mktime((2018,8,16,22,0,0,3,0))  # enter a 8-tuple which expresses time as per localtime. mktime returns an integer, number of seconds since 1/1/2000
-t += 4*3600
-utime.localtime(t)
-or
-utime.localtime(utime.mktime(utime.localtime()) + 3*3600)
-'''

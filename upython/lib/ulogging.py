@@ -43,12 +43,7 @@ class Logger:
         self.logfile = logfile
         self.mode = fmode
         self.autoclose = autoclose
-        if self.logfile is not None and MAIN_FILE_LOGGING: # If all modules writing to a single file use 'with' context manager
-            self.logfile = MAIN_FILE_NAME 
-            self.mode = MAIN_FILE_MODE
-            self.fileopen = True
-            self.autoclose = True   # Must use autoclose ("with" file) method with MAIN FILE LOGGING
-        elif self.logfile is not None and autoclose:       # Open/close safely using 'with' context manager
+        if self.logfile is not None and autoclose:       # Open/close safely using 'with' context manager
             with open(self.logfile, self.mode) as f:
                 f.write("Initialize file: {0} Initial mode was: {1}\n".format(self.logfile, self.mode))
             self.mode = 'a'      # Will append remaining log results
